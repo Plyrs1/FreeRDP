@@ -62,9 +62,11 @@ jobs:
         Write-Host '[+] User : FreeRDP'
         Write-Host '[+] Pass : SuperSecurePassword1234'
     - name: Setting up rclone.
+      env:
+        RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
       run: |
         Move-Item  rclone\rclone-*\* rclone\
-        ${{ secrets.RCLONE_CONFIG }} | Out-File -FilePath rclone.conf
+        (Get-ChildItem env:RCLONE_CONFIG).Value | Out-File -FilePath rclone.conf
         .\rclone\rclone.exe --conf rclone.conf sync googledrive: D:\RDP
     - name: RDP is ready!
       run: | 
