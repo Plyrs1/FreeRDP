@@ -25,11 +25,14 @@ jobs:
       run: Start-Process Powershell -ArgumentList '-Noexit -Command ".\ngrok\ngrok.exe tcp 3389"'
     - name: Setting up desktop.
       run: |
+        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.jpg -OutFile wallpaper.jpg
         Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -name "EnableAutoTray" -Value 0
-        Set-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -name "TaskbarSmallIcons" -Value 1
-        Start-Process 'RUNDLL32.EXE' 'user32.dll,UpdatePerUserSystemParameters'
-        Stop-Process -name explorer -force
-        Start-Process explorer
+        Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -name "TaskbarSmallIcons" -Value 1
+        Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name 'WallPaper' -Value ''
+        Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Control Panel\Desktop" -Name 'Wallpaper' -Value 'D:\a\wallpaper.jpg'
+        # Start-Process 'RUNDLL32.EXE' 'user32.dll,UpdatePerUserSystemParameters'
+        # Stop-Process -name explorer -force
+        # Start-Process explorer
     - name: Creating user account.
       run: |
         New-LocalUser -Name 'FreeRDP' -Password (ConvertTo-SecureString 'SuperSecurePassword1234' -AsPlainText -Force) -FullName 'FreeRDP by me'
