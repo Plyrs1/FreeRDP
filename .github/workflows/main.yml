@@ -73,7 +73,7 @@ jobs:
         Write-Host '[+] Preparing for bisync...'
         .\rclone\rclone.exe --config rclone.conf bisync googledrive: D:\RDP --resync
         Write-Host '[+] Fixing folder permission...'
-        Start-Process 'ICACLS' 'D:\RDP /grant FreeRDP:F'
+        Start-Process 'ICACLS' 'D:\RDP\* /grant FreeRDP:F /t'
     - name: RDP is ready!
       run: | 
         Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/loop.ps1 -OutFile loop.ps1
