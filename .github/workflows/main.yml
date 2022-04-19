@@ -20,7 +20,7 @@ jobs:
       run: | 
         Write-Host '[+] Setting up firewall for Remote Desktop...'
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
-        Start-Job -Command "Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'"
+        Start-Job { Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' }
         Write-Host '[+] Enable RDP user login...'
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
     - name: Creating Tunnel.
