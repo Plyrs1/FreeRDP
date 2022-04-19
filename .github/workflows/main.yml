@@ -43,7 +43,7 @@ jobs:
         Write-Host '[+] Disabling auto hide tray icons...'
         Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -name "EnableAutoTray" -Value 0
         Write-Host '[+] Adding additional configuration after user login...'
-        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -name "Wallpaper" -Value "D:\a\wallpaper.bat"
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -name "Wallpaper" -Value "D:\a\FreeRDP\FreeRDP\wallpaper.bat"
     - name: Finishing up.
       run: |
         Write-Host '[+] Starting audiosrv...'
@@ -54,7 +54,7 @@ jobs:
         Start-Process 'ICACLS' 'C:\Windows\installer /grant FreeRDP:F'
         Write-Host '[+] Checking ngrok...'
         Get-Process -Name 'ngrok'
-        Write-Host '[+] IP :' ((Invoke-WebRequest -Uri http://localhost:4040/api/tunnels -ContentType "application/json").Content | ConvertFrom-Json).tunnels[0].public_url
+        Write-Host '[+] IP   :' ((Invoke-WebRequest -Uri http://localhost:4040/api/tunnels -ContentType "application/json").Content | ConvertFrom-Json).tunnels[0].public_url
         Write-Host '[+] User : FreeRDP'
         Write-Host '[+] Pass : SuperSecurePassword1234'
     - name: RDP is ready!
