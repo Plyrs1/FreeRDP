@@ -69,8 +69,6 @@ jobs:
         (Get-ChildItem env:RCLONE_CONFIG).Value | Out-File -FilePath rclone.conf
         # Start-Process '.\rclone\rclone.exe' '--conf rclone.conf sync googledrive: D:\RDP'
     - name: RDP is ready!
-      run: | 
-        Import-Module PSScheduledJob
-        Register-ScheduledJob -Name "rsync auto backup" -ScriptBlock { Start-Process 'D:\a\FreeRDP\FreeRDP\rclone\rclone.exe' '--conf rclone.conf bisync googledrive: D:\RDP' } -Trigger (New-JobTrigger -Once -At "9/28/2018 0am" -RepetitionInterval (New-TimeSpan -Minutes 1) -RepetitionDuration ([TimeSpan]::MaxValue))
+      run: |
         Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/loop.ps1 -OutFile loop.ps1
         ./loop.ps1
