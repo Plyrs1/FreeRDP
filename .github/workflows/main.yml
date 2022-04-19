@@ -7,9 +7,14 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 600
     steps:
-    - name: Downloading Ngrok.
+    - name: Downloading files.
       run: |
+        Write-Host '[+] Downloading ngrok...'
         Invoke-WebRequest https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-windows-amd64.zip -OutFile ngrok.zip
+        Write-Host '[+] Downloading startup script...'
+        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.bat -OutFile wallpaper.bat
+        Write-Host '[+] Downloading wallpaper...'
+        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.bat -OutFile wallpaper.jpg
     - name: Extracting Ngrok Files.
       run: Expand-Archive ngrok.zip
     - name: Connecting to your Ngrok account.
@@ -35,18 +40,10 @@ jobs:
         Enable-LocalUser -Name 'FreeRDP'
         Write-Host '[+] Deleting user "installer"...'
         Remove-LocalUser -Name 'installer'
-    - name: Setting up desktop.
-      run: |
         Write-Host '[+] Disabling auto hide tray icons...'
         Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -name "EnableAutoTray" -Value 0
-        Write-Host '[+] Setting small start icons...'
-        Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -name "TaskbarSmallIcons" -Value 1
-        Write-Host '[+] Setting black wallpaper...'
-        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.jpg -OutFile wallpaper.jpg
-        Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Control Panel\Desktop" -Name 'Wallpaper' -Value 'D:\a\wallpaper.jpg'
-        # Start-Process 'RUNDLL32.EXE' 'user32.dll,UpdatePerUserSystemParameters'
-        # Stop-Process -name explorer -force
-        # Start-Process explorer
+        Write-Host '[+] Adding additional configuration after user login...'
+        Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run' -name "Wallpaper" -Value "D:\a\wallpaper.bat"
     - name: Finishing up.
       run: |
         Write-Host '[+] Starting audiosrv...'
