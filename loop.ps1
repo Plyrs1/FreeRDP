@@ -1,6 +1,6 @@
 $i = 360
 do {
-    Start-Process 'D:\a\FreeRDP\FreeRDP\rclone\rclone.exe --config D:\a\FreeRDP\FreeRDP\rclone.conf bisync googledrive: D:\RDP' 
+    Start-Process '.\rclone\rclone.exe' '--config rclone.conf bisync googledrive: D:\RDP' 
     Start-Process 'ICACLS' 'D:\RDP /grant FreeRDP:F'
     Write-Host $i
     Sleep 60
