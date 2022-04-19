@@ -14,12 +14,9 @@ jobs:
         Write-Host '[+] Downloading startup script...'
         Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.bat -OutFile wallpaper.bat
         Write-Host '[+] Downloading wallpaper...'
-        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.bat -OutFile wallpaper.jpg
-        Write-Host '[+] Downloading rclone...'
-        Invoke-WebRequest https://downloads.rclone.org/rclone-current-windows-amd64.zip -OutFile rclone.zip
+        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.jpg -OutFile wallpaper.jpg
     - name: Extracting Files.
       run: | 
-        Start-Job { Expand-Archive rclone.zip }
         Expand-Archive ngrok.zip
     - name: Connecting to your Ngrok account.
       run: .\ngrok\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
@@ -65,10 +62,19 @@ jobs:
       env:
         RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
       run: |
-        Move-Item  rclone\rclone-*\* rclone\
+        Write-Host '[+] Downloading rclone...'
+        Invoke-WebRequest https://downloads.rclone.org/rclone-current-windows-amd64.zip -OutFile rclone.zip
+        Write-Host '[+] Extracting rclone...'
+        Expand-Archive rclone.zip
+        Move-Item rclone\rclone-*\* rclone\
         (Get-ChildItem env:RCLONE_CONFIG).Value | Out-File -FilePath rclone.conf
-        # Start-Process '.\rclone\rclone.exe' '--conf rclone.conf sync googledrive: D:\RDP'
+        Write-Host '[+] Running first sync...'
+        .\rclone\rclone.exe --config rclone.conf sync googledrive: D:\RDP
+        Write-Host '[+] Preparing for bisync...'
+        .\rclone\rclone.exe --config rclone.conf bisync googledrive: D:\RDP --resync
+        Write-Host '[+] Fixing folder permission...'
+        Start-Process 'ICACLS' 'D:\RDP /grant FreeRDP:F'
     - name: RDP is ready!
-      run: |
+      run: | 
         Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/loop.ps1 -OutFile loop.ps1
         ./loop.ps1
