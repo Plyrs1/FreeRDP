@@ -18,27 +18,35 @@ jobs:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
     - name: Activating RDP access.
       run: | 
+        Write-Host '[+] Setting up firewall for Remote Desktop...'
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Start-Job -Command "Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'"
+        Write-Host '[+] Enable RDP user login...'
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
     - name: Creating Tunnel.
       run: Start-Process Powershell -ArgumentList '-Noexit -Command ".\ngrok\ngrok.exe tcp 3389"'
+    - name: Creating user account.
+      run: |
+        Write-Host '[+] Creating user FreeRDP...'
+        New-LocalUser -Name 'FreeRDP' -Password (ConvertTo-SecureString 'SuperSecurePassword1234' -AsPlainText -Force) -FullName 'FreeRDP by Plyrs'
+        Write-Host '[+] Adding to Administrator group...'
+        Add-LocalGroupMember -Group 'Administrators' -Member 'FreeRDP'
+        Write-Host '[+] Enabling user...'
+        Enable-LocalUser -Name 'FreeRDP'
+        Write-Host '[+] Deleting user "installer"...'
+        Remove-LocalUser -Name 'installer'
     - name: Setting up desktop.
       run: |
-        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.jpg -OutFile wallpaper.jpg
+        Write-Host '[+] Disabling auto hide tray icons...'
         Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer' -name "EnableAutoTray" -Value 0
+        Write-Host '[+] Setting small start icons...'
         Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -name "TaskbarSmallIcons" -Value 1
-        Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name 'WallPaper' -Value ''
+        Write-Host '[+] Setting black wallpaper...'
+        Invoke-WebRequest https://raw.githubusercontent.com/Plyrs1/FreeRDP/main/wallpaper.jpg -OutFile wallpaper.jpg
         Set-ItemProperty -Path "registry::hkey_users\$((New-Object System.Security.Principal.NTAccount('FreeRDP')).Translate([System.Security.Principal.SecurityIdentifier]).Value)\Control Panel\Desktop" -Name 'Wallpaper' -Value 'D:\a\wallpaper.jpg'
         # Start-Process 'RUNDLL32.EXE' 'user32.dll,UpdatePerUserSystemParameters'
         # Stop-Process -name explorer -force
         # Start-Process explorer
-    - name: Creating user account.
-      run: |
-        New-LocalUser -Name 'FreeRDP' -Password (ConvertTo-SecureString 'SuperSecurePassword1234' -AsPlainText -Force) -FullName 'FreeRDP by me'
-        Add-LocalGroupMember -Group 'Administrators' -Member 'FreeRDP'
-        Enable-LocalUser -Name 'FreeRDP'
-        Remove-LocalUser -Name 'installer'
     - name: Finishing up.
       run: |
         Write-Host '[+] Starting audiosrv...'
